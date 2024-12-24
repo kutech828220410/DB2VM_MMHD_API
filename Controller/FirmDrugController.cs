@@ -15,6 +15,17 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 namespace DB2VM_API
 {
+    public class class_FirmDrug
+    {
+        public string HOSPITAL { get; set; }
+        public string DB { get; set; }
+        public string FirmName { get; set; }
+        public string GroupCode { get; set; }
+        public string Type { get; set; }
+        public string MCODE { get; set; }
+        public string OPER { get; set; }
+
+    }
     [Route("dbvm/[controller]")]
     [ApiController]
     public class FirmDrugController : Controller
@@ -54,17 +65,7 @@ namespace DB2VM_API
 
         }
 
-        public class class_FirmDrug
-        {
-            public string HOSPITAL { get; set; }
-            public string DB { get; set; }
-            public string FirmName { get; set; }
-            public string GroupCode { get; set; }
-            public string Type { get; set; }
-            public string MCODE { get; set; }
-            public string OPER { get; set; }
-
-        }
+      
 
         [Route("B1UD")]
         [HttpGet()]

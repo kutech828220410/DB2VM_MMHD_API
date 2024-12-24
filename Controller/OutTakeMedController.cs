@@ -35,7 +35,7 @@ namespace DB2VM_API
         [HttpGet()]
         public string Get_Sample()
         {
-            string str = Basic.Net.WEBApiGet(@"http://10.13.66.58:4433/api/OutTakeMed/Sample");
+            string str = Basic.Net.WEBApiGet(@"http://127.0.0.1:4433/api/OutTakeMed/Sample");
 
             return str;
         }
@@ -92,7 +92,7 @@ namespace DB2VM_API
                 returnData returnData = new returnData();
                 returnData.ServerName = 成本中心;
                 returnData.Data = outTakeMed_Datas;
-                string json_out = Basic.Net.WEBApiPostJson("http://192.168.5.200:4433/api/OutTakeMed/new", returnData.JsonSerializationt());
+                string json_out = Basic.Net.WEBApiPostJson("http://127.0.0.1:4433/api/OutTakeMed/new", returnData.JsonSerializationt());
                 returnData = json_out.JsonDeserializet<returnData>();
                 if (returnData.Code != 200)
                 {
@@ -106,39 +106,36 @@ namespace DB2VM_API
         [HttpPost]
         public string Post_storehouse([FromBody] List<class_OutTakeMed_data> data)
         {
-            List<class_OutTakeMed_data> data_B1UD = (from temp in data
-                                                     where temp.成本中心.ToUpper() == "B1UD"
-                                                     select temp).ToList();
+            Logger.Log("OutTakeMed.storehouse", data.JsonSerializationt());
 
-            List<class_OutTakeMed_data> data_B2UD = (from temp in data
-                                                     where temp.成本中心.ToUpper() == "B2UD"
-                                                     select temp).ToList();
-            if (data_B1UD.Count > 0)
-            {
-                returnData returnData = new returnData();
-                returnData.ServerName = "B1UD";
-                returnData.Data = data_B1UD;
-                string json_out = Basic.Net.WEBApiPostJson("http://10.13.66.58:4433/api/OutTakeMed/new", returnData.JsonSerializationt());
-                returnData = json_out.JsonDeserializet<returnData>();
-                if(returnData.Code != 200)
-                {
-                    return returnData.JsonSerializationt(true);
-                }
-           
-            }
-            if (data_B2UD.Count > 0)
-            {
-                returnData returnData = new returnData();
-                returnData.ServerName = "B2UD";
-                returnData.Data = data_B2UD;
-                string json_out = Basic.Net.WEBApiPostJson("http://10.13.66.58:4433/api/OutTakeMed/new", returnData.JsonSerializationt());
-                returnData = json_out.JsonDeserializet<returnData>();
-                if (returnData.Code != 200)
-                {
-                    return returnData.JsonSerializationt(true);
-                }
+            string[] storehouse_names = new string[] { "3PST錠1", "3PST錠2", "3PST錠3", "3PST錠4", "3PST錠5", "3PST錠6", "3PST水1", "3PST水2" };
 
+
+            for (int i = 0; i < storehouse_names.Length; i++)
+            {
+                string storehouse_name = storehouse_names[i];
+                storehouse_name = storehouse_name.Replace("3PST", "");
+                storehouse_name = $"{storehouse_name}台";
+
+                List<class_OutTakeMed_data> data_buf = (from temp in data
+                                                        where temp.成本中心.ToUpper() == storehouse_name
+                                                        select temp).ToList();
+                if (data_buf.Count > 0)
+                {
+                    returnData returnData = new returnData();
+                    returnData.ServerName = storehouse_name;
+                    returnData.Data = data_buf;
+                    string json_out = Basic.Net.WEBApiPostJson("http://127.0.0.1:4433/api/OutTakeMed/new", returnData.JsonSerializationt());
+                    returnData = json_out.JsonDeserializet<returnData>();
+                    if (returnData.Code != 200)
+                    {
+                        string json_err = returnData.JsonSerializationt(true);
+                        Logger.Log("OutTakeMed.storehouse_Err", json_err);
+                        return json_err;
+                    }
+                }
             }
+         
             return "OK";
         }
         private Dictionary<string, List<class_OutTakeMed_data>> ToDicByCostCenter(List<class_OutTakeMed_data> class_OutTakeMed_data)
