@@ -42,46 +42,61 @@ namespace DB2VM_API
         [HttpPost]
         public string Post([FromBody] List<class_OutTakeMed_data> data)
         {
-            if (data.Count == 0) return "";
-            string json_out = "";
-            List<class_OutTakeMed_data> data_B1UD = (from temp in data
-                                                     where temp.成本中心.ToUpper() == "1"
-                                                     select temp).ToList();
+            //if (data.Count == 0) return "";
+            //string json_out = "";
+            //List<class_OutTakeMed_data> data_B1UD = (from temp in data
+            //                                         where temp.成本中心.ToUpper() == "1"
+            //                                         select temp).ToList();
 
-            List<class_OutTakeMed_data> data_B2UD = (from temp in data
-                                                     where temp.成本中心.ToUpper() == "2"
-                                                     select temp).ToList();
+            //List<class_OutTakeMed_data> data_B2UD = (from temp in data
+            //                                         where temp.成本中心.ToUpper() == "2"
+            //                                         select temp).ToList();
 
-            if (data[0].成本中心 == "1")
+            //if (data[0].成本中心 == "1")
+            //{
+            //    returnData returnData = new returnData();
+            //    returnData.ServerName = "B1UD";
+            //    returnData.Data = data_B1UD;
+            //    json_out = Basic.Net.WEBApiPostJson("http://10.13.66.58:4433/api/OutTakeMed/new", returnData.JsonSerializationt());
+            //    returnData = json_out.JsonDeserializet<returnData>();
+            //    if (returnData == null)
+            //    {
+            //        return "NG";
+            //    }
+            //    if (returnData.Code != 200)
+            //    {
+            //        return "NG";
+            //    }
+            //}
+            //if (data[0].成本中心 == "2")
+            //{
+            //    returnData returnData = new returnData();
+            //    returnData.ServerName = "B2UD";
+            //    returnData.Data = data_B2UD;
+            //    json_out = Basic.Net.WEBApiPostJson("http://10.13.66.58:4433/api/OutTakeMed/new", returnData.JsonSerializationt());
+            //    returnData = json_out.JsonDeserializet<returnData>();
+            //    if (returnData == null)
+            //    {
+            //        return "NG";
+            //    }
+            //    if (returnData.Code != 200)
+            //    {
+            //        return "NG";
+            //    }
+            //}
+            Dictionary<string, List<class_OutTakeMed_data>> dic = ToDicByCostCenter(data);
+            foreach (string key in dic.Keys)
             {
+                List<class_OutTakeMed_data> outTakeMed_Datas = dic[key];
+                string 成本中心 = key;
                 returnData returnData = new returnData();
-                returnData.ServerName = "B1UD";
-                returnData.Data = data_B1UD;
-                json_out = Basic.Net.WEBApiPostJson("http://10.13.66.58:4433/api/OutTakeMed/new", returnData.JsonSerializationt());
+                returnData.ServerName = 成本中心;
+                returnData.Data = outTakeMed_Datas;
+                string json_out = Basic.Net.WEBApiPostJson("http://192.168.5.200:4433/api/OutTakeMed/new", returnData.JsonSerializationt());
                 returnData = json_out.JsonDeserializet<returnData>();
-                if (returnData == null)
-                {
-                    return "NG";
-                }
                 if (returnData.Code != 200)
                 {
-                    return "NG";
-                }
-            }
-            if (data[0].成本中心 == "2")
-            {
-                returnData returnData = new returnData();
-                returnData.ServerName = "B2UD";
-                returnData.Data = data_B2UD;
-                json_out = Basic.Net.WEBApiPostJson("http://10.13.66.58:4433/api/OutTakeMed/new", returnData.JsonSerializationt());
-                returnData = json_out.JsonDeserializet<returnData>();
-                if (returnData == null)
-                {
-                    return "NG";
-                }
-                if (returnData.Code != 200)
-                {
-                    return "NG";
+                    return returnData.JsonSerializationt(true);
                 }
             }
             return "OK";
@@ -125,6 +140,22 @@ namespace DB2VM_API
 
             }
             return "OK";
+        }
+        private Dictionary<string, List<class_OutTakeMed_data>> ToDicByCostCenter(List<class_OutTakeMed_data> class_OutTakeMed_data)
+        {
+            Dictionary<string, List<class_OutTakeMed_data>> dictionary = new Dictionary<string, List<class_OutTakeMed_data>>();
+            foreach (var item in class_OutTakeMed_data)
+            {
+                if (dictionary.TryGetValue(item.成本中心, out List<class_OutTakeMed_data> list))
+                {
+                    list.Add(item);
+                }
+                else
+                {
+                    dictionary[item.成本中心] = new List<class_OutTakeMed_data>() { item };
+                }
+            }
+            return dictionary;
         }
     }
 }
