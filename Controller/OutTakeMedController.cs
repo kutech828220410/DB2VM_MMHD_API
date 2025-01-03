@@ -108,23 +108,26 @@ namespace DB2VM_API
         {
             Logger.Log("OutTakeMed.storehouse", data.JsonSerializationt());
 
-            string[] storehouse_names = new string[] { "3PST錠1", "3PST錠2", "3PST錠3", "3PST錠4", "3PST錠5", "3PST錠6", "3PST水1", "3PST水2" };
+            string[] storehouse_names = new string[] { "3PTS錠1", "3PTS錠2", "3PTS錠3", "3PTS錠4", "3PTS錠5", "3PTS錠6", "3PTS水1", "3PTS水2" };
+            //for(int i = 0; i< data.Count)
 
 
             for (int i = 0; i < storehouse_names.Length; i++)
             {
                 string storehouse_name = storehouse_names[i];
-                storehouse_name = storehouse_name.Replace("3PST", "");
-                storehouse_name = $"{storehouse_name}台";
-
                 List<class_OutTakeMed_data> data_buf = (from temp in data
                                                         where temp.成本中心.ToUpper() == storehouse_name
                                                         select temp).ToList();
+                storehouse_name = storehouse_name.Replace("3PTS", "");
+                storehouse_name = $"{storehouse_name}台";
+
+                
                 if (data_buf.Count > 0)
                 {
                     returnData returnData = new returnData();
                     returnData.ServerName = storehouse_name;
                     returnData.Data = data_buf;
+                    string json_in = returnData.JsonSerializationt();
                     string json_out = Basic.Net.WEBApiPostJson("http://127.0.0.1:4433/api/OutTakeMed/new", returnData.JsonSerializationt());
                     returnData = json_out.JsonDeserializet<returnData>();
                     if (returnData.Code != 200)
